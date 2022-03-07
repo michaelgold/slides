@@ -139,23 +139,15 @@ class SLIDES_PT_settings(bpy.types.Panel):
     def draw(self, context):
         # You can set the property values that should be used when the user
         # presses the button in the UI.
-        layout = self.layout 
-        row = layout.row()
-        grid_flow = row.grid_flow(columns=1, even_columns=True, row_major=True)
-        col = grid_flow.column()
-        this_context = bpy.context.scene
+        # layout = self.layout 
+        # row = layout.row()
+        # grid_flow = row.grid_flow(columns=1, even_columns=True, row_major=True)
+        # col = grid_flow.column()
+        # this_context = bpy.context.scene
         
-        col.prop(this_context.slides, 'enable_pre_generation_script')
+        # col.prop(this_context.slides, 'enable_pre_generation_script'
+        pass
 
-        if this_context.slides.enable_pre_generation_script:
-            box = col.box()
-            box.prop(this_context.slides, 'pre_generation_script', text="Python Script")
-
-        col.prop(this_context.slides, 'enable_post_generation_script')
-
-        if this_context.slides.enable_post_generation_script:
-            box = col.box()
-            box.prop(this_context.slides, 'post_generation_script', text="Python Script")
 
 class SLIDES_PT_slide_list(bpy.types.Panel):
     bl_label = "Slides"
@@ -203,10 +195,10 @@ classes = [
     SLIDES_PG_scene,
     SLIDES_PT_slide_list,
     SLIDES_UL_slide_list,
-    SLIDES_PT_settings,
     SLIDES_OT_slide_list_new_item,
     SLIDES_OT_slide_list_delete_item,
     SLIDES_OT_slide_list_move_item,
+    # SLIDES_PT_settings
 ]
 
 
