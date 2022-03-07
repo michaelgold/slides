@@ -1,0 +1,13 @@
+{
+  "name": "slides",
+  "description": "Create presentation slides using Geometry Nodes",
+  "author": "Michael Gold",
+  "version": [0, 0, 1],
+  "blender": [3, 1, 0],
+  "location": "Object > Modifier",
+  "warning": "",
+  "doc_url": "Slides",
+  "tracker_url": "https://github.com/michaelgold/slides",
+  "support": "COMMUNITY",
+  "category": "Presentations"
+}
