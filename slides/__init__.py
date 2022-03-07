@@ -113,6 +113,86 @@ class SLIDES_OT_slide_list_move_item(bpy.types.Operator):
         return{'FINISHED'}
 
 
+class SLIDES_OT_change_slide(bpy.types.Operator):
+    """Change slide"""
+
+    bl_idname = "slides.slide_list_change_slide"
+    bl_label = "Change slide"
+    direction = "next"
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene.slides.slide_list
+
+    def move_index(self):
+
+        """ Move index of an item render queue while clamping it. """
+
+        index = bpy.context.scene.slides.slide_list_index
+        list_length = len(bpy.context.scene.slides.slide_list) - 1 #starts at zero
+        
+        calculated_index = index + (-1 if self.direction == 'prev' else 1)
+        new_index = 0 if calculated_index < 0 else calculated_index
+        new_index = list_length if calculated_index > list_length else calculated_index
+        
+
+        
+
+        bpy.context.scene.slides.slide_list_index =  max(0, min(new_index, list_length))
+
+        print(bpy.context.scene.slides.slide_list_index)
+
+    def zoom_on_index(self):
+        for obj in bpy.context.selected_objects:
+            obj.select_set(False)
+
+
+        slide_list = bpy.context.scene.slides.slide_list
+        index = bpy.context.scene.slides.slide_list_index
+        new_active_item = slide_list[index]['slide']
+        new_active_item.select_set(True)
+
+        bpy.context.view_layer.objects.active = None
+        bpy.context.view_layer.objects.active = new_active_item
+
+        for area in bpy.context.screen.areas:
+            if area.type == 'VIEW_3D':
+                ctx = bpy.context.copy()
+                ctx['area'] = area
+                ctx['region'] = area.regions[-1]
+                bpy.ops.view3d.view_selected(ctx)  
+
+class SLIDES_OT_prev_slide(SLIDES_OT_change_slide):
+    """Previous slide"""
+
+    bl_idname = "slides.slide_list_prev_slide"
+    bl_label = "Previous slide"
+    
+    def execute(self, context):
+        self.direction = "prev"
+
+        self.move_index()
+        self.zoom_on_index()
+        print("Previous slide")
+
+        return{'FINISHED'}
+
+class SLIDES_OT_next_slide(SLIDES_OT_change_slide):
+    """Next slide"""
+
+    bl_idname = "slides.slide_list_next_slide"
+    bl_label = "Next slide"
+
+    def execute(self, context):
+        self.direction = "next"
+
+        self.move_index()
+        self.zoom_on_index()
+        print("Next slide")
+
+        return{'FINISHED'}
+
+
   
 class SLIDES_PG_scene(bpy.types.PropertyGroup):
     generated_metadata: bpy.props.StringProperty(name="Generated Meta Data")
@@ -198,9 +278,13 @@ classes = [
     SLIDES_OT_slide_list_new_item,
     SLIDES_OT_slide_list_delete_item,
     SLIDES_OT_slide_list_move_item,
+    SLIDES_OT_change_slide,
+    SLIDES_OT_prev_slide,
+    SLIDES_OT_next_slide
     # SLIDES_PT_settings
 ]
 
+addon_keymaps = []
 
 def register():
     # global custom_icons
@@ -218,6 +302,15 @@ def register():
     # bpy.types.Object.slides = bpy.props.PointerProperty(type=SLIDES_PG_main)
     bpy.types.Scene.slides = bpy.props.PointerProperty(type=SLIDES_PG_scene)
 
+    wm = bpy.context.window_manager
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = wm.keyconfigs.addon.keymaps.new(name='3D View', space_type='VIEW_3D')
+        prev = km.keymap_items.new(SLIDES_OT_prev_slide.bl_idname, type='LEFT_ARROW', value='PRESS', ctrl=True)
+        next = km.keymap_items.new(SLIDES_OT_next_slide.bl_idname, type='RIGHT_ARROW', value='PRESS', ctrl=True)
+        addon_keymaps.append((km, prev))
+        addon_keymaps.append((km, next))
+
 
 #same as register but backwards, deleting references
 def unregister():
@@ -231,6 +324,15 @@ def unregister():
 
     for this_class in classes:
         bpy.utils.unregister_class(this_class)  
+
+    # Remove the hotkey
+    for km, prev in addon_keymaps:
+        km.keymap_items.remove(prev)
+
+    for km, next in addon_keymaps:
+        km.keymap_items.remove(next)
+
+    addon_keymaps.clear()
 
 #a quick line to autorun the script from the text editor when we hit 'run script'
 if __name__ == '__main__':
